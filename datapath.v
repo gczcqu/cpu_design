@@ -45,7 +45,6 @@ module datapath(
 	input wire memtoregW,
 	input wire regwriteW
     );
-	
 	//fetch stage
 	wire stallF;
 	//FD
