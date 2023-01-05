@@ -22,7 +22,8 @@
 
 module alu(
 	input wire[31:0] a,b,
-	input wire[2:0] op,
+	input wire[4:0] sa,
+	input wire[4:0] op,
 	output reg[31:0] y,
 	output reg overflow,
 	output wire zero
@@ -32,17 +33,35 @@ module alu(
 	// assign bout = op[2] ? ~b : b;
 	// assign s = a + bout + op[2];
 	always @(*) begin
-		case (op[2:0])
+		case (op[4:0])
 			// 2'b00: y <= a & bout;
 			// 2'b01: y <= a | bout;
 			// 2'b10: y <= s;
 			// 2'b11: y <= s[31];
-			3'b000: y <= a & b;
-			3'b001: y <= a | b;
-			3'b010: y <= ~(a | b);
-			3'b011: y <= a^b;
-			3'b100:begin
+			5'b00000: y <= a & b;   //and,andi
+			5'b00001: y <= a | b;   //or,ori
+			5'b00010: y <= ~(a | b);//nor
+			5'b00011: y <= a^b;     // xor,xori
+			5'b00100:begin          //lui
 				y <= b<<16;
+			end
+			5'b00101:begin          //SLLV(逻辑左移)
+				y <= b<<a[4:0];         
+			end
+			5'b00110:begin			//SLL(立即数逻辑左移)
+				y <= b<<sa;				
+			end
+			5'b00111:begin          //SRAV(算数右移)
+				y <= $signed(b)>>>a[4:0];
+			end
+			5'b01000:begin			//SRA(立即数算数右移)
+				y <= $signed(b)>>>sa;
+			end
+			5'b01001:begin			//SRLV(逻辑右移)
+				y <= b>>a[4:0]; 
+			end
+			5'b01010:begin			//SRL(立即数逻辑右移)
+				y <= b>>sa;
 			end
 			default : y <= 32'b0;
 		endcase	
