@@ -19,7 +19,7 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-
+`include "defines2.vh"
 module controller(
 	input wire clk,rst,
 	//decode stage
@@ -31,7 +31,7 @@ module controller(
 	output wire memtoregE,alusrcE,
 	output wire regdstE,regwriteE,	
 	output wire[4:0] alucontrolE,
-
+	output wire hiloregwriteE,hiloregreadE,hiloregreadW,
 	//mem stage
 	output wire memtoregM,memwriteM,
 				regwriteM,
@@ -41,16 +41,19 @@ module controller(
     );
 	
 	//decode stage
-	wire[2:0] aluopD;
+	wire[3:0] aluopD;
 	wire memtoregD,memwriteD,alusrcD,
-		regdstD,regwriteD;
+		regdstD,regwriteD,hiloregwriteD,hiloregreadD;
 	wire[4:0] alucontrolD;
 
 	//execute stage
 	wire memwriteE;
+	//M stage
+	wire hiloregreadM;
 
 	maindec md(
 		opD,
+		functD,
 		memtoregD,memwriteD,
 		branchD,alusrcD,
 		regdstD,regwriteD,
@@ -58,25 +61,26 @@ module controller(
 		aluopD
 		);
 	aludec ad(functD,aluopD,alucontrolD);
-
+	assign hiloregwriteD = (alucontrolD==`MTHI_CONTROL)|(alucontrolD==`MTLO_CONTROL)?1:0;
+	assign hiloregreadD = (alucontrolD==`MFHI_CONTROL)|(alucontrolD==`MFLO_CONTROL)?1:0;
 	assign pcsrcD = branchD & equalD;
 
 	//pipeline registers
-	floprc #(8) regE(
+	floprc #(12) regE(
 		clk,
 		rst,
 		flushE,
-		{memtoregD,memwriteD,alusrcD,regdstD,regwriteD,alucontrolD},
-		{memtoregE,memwriteE,alusrcE,regdstE,regwriteE,alucontrolE}
+		{hiloregreadD,hiloregwriteD,memtoregD,memwriteD,alusrcD,regdstD,regwriteD,alucontrolD},
+		{hiloregreadE,hiloregwriteE,memtoregE,memwriteE,alusrcE,regdstE,regwriteE,alucontrolE}
 		);
-	flopr #(8) regM(
+	flopr #(4) regM(
 		clk,rst,
-		{memtoregE,memwriteE,regwriteE},
-		{memtoregM,memwriteM,regwriteM}
+		{hiloregreadE,memtoregE,memwriteE,regwriteE},
+		{hiloregreadM,memtoregM,memwriteM,regwriteM}
 		);
-	flopr #(8) regW(
+	flopr #(3) regW(
 		clk,rst,
-		{memtoregM,regwriteM},
-		{memtoregW,regwriteW}
+		{hiloregreadM,memtoregM,regwriteM},
+		{hiloregreadW,memtoregW,regwriteW}
 		);
 endmodule

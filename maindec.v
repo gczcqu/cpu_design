@@ -19,16 +19,17 @@
 // 
 //////////////////////////////////////////////////////////////////////////////////
 
-
+`include "defines2.vh"
 module maindec(
 	input wire[5:0] op,
+	input wire[5:0]funct,
 	output wire memtoreg,memwrite,
 	output wire branch,alusrc,
 	output wire regdst,regwrite,
 	output wire jump,
-	output wire[2:0] aluop
+	output wire[3:0] aluop
     );
-	reg[9:0] controls;
+	reg[10:0] controls;
 	assign {regwrite,regdst,alusrc,branch,memwrite,memtoreg,jump,aluop} = controls;
 	always @(*) begin
 		case (op)
@@ -39,14 +40,19 @@ module maindec(
 			// 6'b001100:controls <= 9'b101000000;//ADDI
 			//8鏉￠?昏緫杩愮畻鎸囦护
 			//鍓嶅洓鏉′负R-type鍨嬫寚浠?
-			6'b000000:controls <= 10'b1100000000;//R-TYRE
+			// `R_TYPE:controls <= {7'b1100000,`R_TYPE_OP};//R-TYRE
 			//4鏉＄珛鍗虫暟閫昏緫杩愮畻鎸囦护
-			6'b001100:controls <= 10'b1010000001;//ANDI
-			6'b001111:controls <= 10'b1010000010;//LUI锛堣繖涓笉澶竴鏍凤紝鍚庨潰瑕佸鐞嗕竴涓嬶級
-			6'b001101:controls <= 10'b1010000011;//ORI
-			6'b001110:controls <= 10'b1010000100;//XORI
+			`ANDI:controls <= {7'b1010000,`ANDI_OP};//ANDI
+			`XORI:controls <= {7'b1010000,`XORI_OP};//LUI锛堣繖涓笉澶竴鏍凤紝鍚庨潰瑕佸鐞嗕竴涓嬶級
+			`ORI:controls <= {7'b1010000,`ORI_OP};//ORI
+			`LUI:controls <= {7'b1010000,`LUI_OP};//XORI
 			
 			// 6'b000010:controls <= 9'b000000100;//J
+			`R_TYPE : case (funct)
+				`MTHI: controls <= {7'b0000000,`R_TYPE_OP};
+				`MTLO: controls <= {7'b0000000,`R_TYPE_OP};
+				default:  controls <= {7'b1100000,`R_TYPE_OP};
+			endcase
 			default:  controls <= 10'b0000000000;//illegal op
 		endcase
 	end
