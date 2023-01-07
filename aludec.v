@@ -33,18 +33,17 @@ module aludec(
 			`LUI_OP:alucontrol <= `LUI_CONTROL;//LUI
 			`ORI_OP:alucontrol <= `OR_CONTROL;//ORI
 			`XORI_OP:alucontrol <= `XOR_CONTROL;//XORI
+			//四条立即数算数运算指令
+			`ADDI_OP:alucontrol <= `ADD_CONTROL;//ADDI
+			`ADDIU_OP:alucontrol <= `ADDU_CONTROL;//ADDIU
+			`SLTI_OP:alucontrol <= `SLT_CONTROL;//SLTI
+			`SLTIU_OP:alucontrol <= `SLTU_CONTROL;//SLTIU
 			// R-type指令
 			`R_TYPE_OP : case (funct)
-				// 6'b100000:alucontrol <= 3'b010; //add
-				// 6'b100010:alucontrol <= 3'b110; //sub
-				// 6'b100100:alucontrol <= 3'b000; //and
-				// 6'b100101:alucontrol <= 3'b001; //or
-				// 6'b101010:alucontrol <= 3'b111; //slt
-				
 				//八条逻辑运算指令
 				//前四条R-type指令
 				`AND:alucontrol <= `AND_CONTROL; //AND
-				`OR:alucontrol <= `OR_CONTROL; //OR
+				`OR:alucontrol <= `OR_CONTROL; 	//OR
 				`NOR:alucontrol <= `NOR_CONTROL; //NOR
 				`XOR:alucontrol <= `XOR_CONTROL; //XOR
 
@@ -62,6 +61,19 @@ module aludec(
 				`MFLO:alucontrol <= `MFLO_CONTROL; //MFLO
 				`MTLO:alucontrol <= `MTLO_CONTROL; //MTLO
 
+				//14条算数指令(10条R-type类型)
+				//1.6条基础的算数指令
+				`ADD:alucontrol <= `ADD_CONTROL; //ADD
+				`ADDU:alucontrol <= `ADDU_CONTROL; //ADDU
+				`SUB:alucontrol <= `SUB_CONTROL; //SUB
+				`SUBU:alucontrol <= `SUBU_CONTROL; //SUBU
+				`SLT:alucontrol <= `SLT_CONTROL; //SLT
+				`SLTU:alucontrol <= `SLTU_CONTROL; //SLTU
+				//2.乘法指令与除法指令
+				`MULT:alucontrol <= `MULT_CONTROL; //MULT
+				`MULTU:alucontrol <= `MULTU_CONTROL; //MULTU
+				`DIV:alucontrol <= `DIV_CONTROL; //DIV
+				`DIVU:alucontrol <= `DIVU_CONTROL; //DIVU
 				default:  alucontrol <= 5'b00000;
 			endcase
 		endcase

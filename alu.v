@@ -28,7 +28,10 @@ module alu(
 	output reg overflow,
 	output wire zero
     );
-
+	reg[31:0] mult_result;
+	reg[31:0] div_result;
+	reg[31:0] commont_reult;
+	wire [63:0] alu_out_signed_mult, alu_out_unsigned_mult;
 	// wire[31:0] s,bout;
 	// assign bout = op[2] ? ~b : b;
 	// assign s = a + bout + op[2];
@@ -38,34 +41,29 @@ module alu(
 			// 2'b01: y <= a | bout;
 			// 2'b10: y <= s;
 			// 2'b11: y <= s[31];
-			`AND_CONTROL: y <= a & b;   //and,andi
-			`OR_CONTROL: y <= a | b;   //or,ori
-			`NOR_CONTROL: y <= ~(a | b);//nor
-			`XOR_CONTROL: y <= a^b;     // xor,xori
-			`LUI_CONTROL:begin          //lui
-				y <= b<<16;
-			end
-			`SLLV_CONTROL:begin          //SLLV(逻辑左移)
-				y <= b<<a[4:0];         
-			end
-			`SLL_CONTROL:begin			//SLL(立即数逻辑左移)
-				y <= b<<sa;				
-			end
-			`SRAV_CONTROL:begin          //SRAV(算数右移)
-				y <= $signed(b)>>>a[4:0];
-			end
-			`SRA_CONTROL:begin			//SRA(立即数算数右移)
-				y <= $signed(b)>>>sa;
-			end
-			`SRLV_CONTROL:begin			//SRLV(逻辑右移)
-				y <= b>>a[4:0]; 
-			end
-			`SRL_CONTROL:begin			//SRL(立即数逻辑右移)
-				y <= b>>sa;
-			end
+			`AND_CONTROL: y <= a & b;     //and,andi
+			`OR_CONTROL: y <= a | b;      //or,ori
+			`NOR_CONTROL: y <= ~(a | b);  //nor
+			`XOR_CONTROL: y <= a^b;       // xor,xori
+			`LUI_CONTROL: y <= b<<16;     //lui
+			`SLLV_CONTROL: y <= b<<a[4:0];//SLLV(逻辑左移)
+			`SLL_CONTROL: y <= b<<sa;	  //SLL(立即数逻辑左移)				
+			`SRAV_CONTROL: y <= $signed(b)>>>a[4:0];//SRAV(算数右移)
+			`SRA_CONTROL: y <= $signed(b)>>>sa;//SRA(立即数算数右移)
+			`SRLV_CONTROL:y <= b>>a[4:0]; //SRLV(逻辑右移)
+			`SRL_CONTROL: y <= b>>sa;	 //SRL(立即数逻辑右移)
+			//算数指令（包含十条指令乘除法除外）
+			`ADD_CONTROL: y<=a+b;		 //ADD(考虑溢出)，ADDI
+			`ADDU_CONTROL: y<=a+b;	     //ADDU,ADDIU
+			`SUB_CONTROL: y<=a-b;	     //SUB(考虑溢出)
+			`SUBU_CONTROL: y<=a-b;	     //SUBU
+			`SLT_CONTROL: y<= $signed(a)<$signed(b)?1:0;//SLT（有符号比较）,SLTI
+			`SLTU_CONTROL: y<= a<b?1:0;	 //SLTU,SLTUI
 			default : y <= 32'b0;
 		endcase	
 	end
+
+
 	assign zero = (y == 32'b0);
 
 //	always @(*) begin

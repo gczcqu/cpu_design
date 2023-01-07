@@ -21,11 +21,11 @@
 
 
 module signext(
+    input wire op,
 	input wire[15:0] a,
 	output wire[31:0] y
     );
-    //有符号扩展
-//	assign y = {{16{a[15]}},a};
-    //无符号扩展
-    assign y = {{16{0'b0}},a};
+    //op为1时是有符号扩展
+    assign y = op?{{16{a[15]}},a}:{{16{0'b0}},a};
+
 endmodule

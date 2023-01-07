@@ -31,7 +31,7 @@ module controller(
 	output wire memtoregE,alusrcE,
 	output wire regdstE,regwriteE,	
 	output wire[4:0] alucontrolE,
-	output wire hiloregwriteE,hiloregreadE,hiloregreadW,
+	output wire hiloregwriteE,hiloregreadE,hiloregreadW,signimmnextD,
 	//mem stage
 	output wire memtoregM,memwriteM,
 				regwriteM,
@@ -54,6 +54,7 @@ module controller(
 	maindec md(
 		opD,
 		functD,
+		signimmnextD,
 		memtoregD,memwriteD,
 		branchD,alusrcD,
 		regdstD,regwriteD,

@@ -23,37 +23,38 @@
 module maindec(
 	input wire[5:0] op,
 	input wire[5:0]funct,
+	output wire signimmnext,
 	output wire memtoreg,memwrite,
 	output wire branch,alusrc,
 	output wire regdst,regwrite,
 	output wire jump,
 	output wire[3:0] aluop
     );
-	reg[10:0] controls;
-	assign {regwrite,regdst,alusrc,branch,memwrite,memtoreg,jump,aluop} = controls;
+	reg[11:0] controls;
+	assign {signimmnext,regwrite,regdst,alusrc,branch,memwrite,memtoreg,jump,aluop} = controls;
 	always @(*) begin
 		case (op)
-			// 6'b000000:controls <= 9'b1100000100;//R-TYRE
-			// 6'b100011:controls <= 9'b101001000;//LW
-			// 6'b101011:controls <= 9'b001010000;//SW
-			// 6'b000100:controls <= 9'b000100001;//BEQ
-			// 6'b001100:controls <= 9'b101000000;//ADDI
 			//8鏉￠?昏緫杩愮畻鎸囦护
 			//鍓嶅洓鏉′负R-type鍨嬫寚浠?
-			// `R_TYPE:controls <= {7'b1100000,`R_TYPE_OP};//R-TYRE
 			//4鏉＄珛鍗虫暟閫昏緫杩愮畻鎸囦护
-			`ANDI:controls <= {7'b1010000,`ANDI_OP};//ANDI
-			`XORI:controls <= {7'b1010000,`XORI_OP};//LUI锛堣繖涓笉澶竴鏍凤紝鍚庨潰瑕佸鐞嗕竴涓嬶級
-			`ORI:controls <= {7'b1010000,`ORI_OP};//ORI
-			`LUI:controls <= {7'b1010000,`LUI_OP};//XORI
+			`ANDI:controls <= {8'b01010000,`ANDI_OP};//ANDI
+			`XORI:controls <= {8'b01010000,`XORI_OP};//LUI锛堣繖涓笉澶竴鏍凤紝鍚庨潰瑕佸鐞嗕竴涓嬶級
+			`ORI:controls <= {8'b01010000,`ORI_OP};//ORI
+			`LUI:controls <= {8'b01010000,`LUI_OP};//XORI
+
+			//四条立即数运算指令
+			`ADDI:controls <= {8'b11010000,`ADDI_OP};//ADDI
+			`ADDIU:controls <= {8'b11010000,`ADDIU_OP};//ADDIU
+			`SLTI:controls <= {8'b11010000,`SLTI_OP};//SLTI
+			`SLTIU:controls <= {8'b11010000,`SLTIU_OP};//SLTIU
 			
 			// 6'b000010:controls <= 9'b000000100;//J
 			`R_TYPE : case (funct)
-				`MTHI: controls <= {7'b0000000,`R_TYPE_OP};
-				`MTLO: controls <= {7'b0000000,`R_TYPE_OP};
-				default:  controls <= {7'b1100000,`R_TYPE_OP};
+				`MTHI: controls <= {8'b00000000,`R_TYPE_OP};
+				`MTLO: controls <= {8'b00000000,`R_TYPE_OP};
+				default:  controls <= {8'b01100000,`R_TYPE_OP};
 			endcase
-			default:  controls <= 10'b0000000000;//illegal op
+			default:  controls <= 11'b00000000000;//illegal op
 		endcase
 	end
 endmodule
