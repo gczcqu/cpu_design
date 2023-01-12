@@ -40,8 +40,10 @@ module datapath(
 	//mem stage
 	input wire memtoregM,
 	input wire regwriteM,
-	output wire[31:0] aluoutM,writedataM,
+	output wire[31:0] data_addr,mem_wdataM,
+	output wire [3:0] data_wenM,
 	input wire[31:0] readdataM,
+	input wire [2:0] l_s_typeM,
 	//writeback stage
 	input wire memtoregW,
 	input wire regwriteW
@@ -68,10 +70,14 @@ module datapath(
 	//mem stage
 	wire [4:0] writeregM;
 	wire [31:0] hilo_outM;
+	wire [31:0] mem_wenM;
+	wire [31:0] aluoutM;
+	wire [31:0] data_wdataM,data_rdataM;
 	//writeback stage
 	wire [4:0] writeregW;
-	wire [31:0] aluoutW,readdataW,resultW,alumemW;
+	wire [31:0] data_rdataW,resultW,alumemW;
 	wire [31:0] hilo_outW;
+	wire [31:0] aluoutW;
 
 	//hazard detection
 	hazard h(
@@ -144,16 +150,18 @@ module datapath(
 	hilo_reg hilo(clk,rst,hiloregwriteE,hiloregreadE,alucontrolE,srca2E,hilo_outE);
 
 	//mem stage
-	flopr #(32) r1M(clk,rst,srcb2E,writedataM);
+	flopr #(32) r1M(clk,rst,srcb2E,data_wdataM);
 	flopr #(32) r2M(clk,rst,aluoutE,aluoutM);
 	flopr #(32) r3M(clk,rst,hilo_outE,hilo_outM);
 	flopr #(5) r4M(clk,rst,writeregE,writeregM);
+	assign data_addr = {aluoutM[31:2],2'b00};
+	mem_control mc(l_s_typeM,aluoutM[1:0],data_wdataM,mem_wdataM,data_wenM,readdataM,data_rdataM);
 
 	//writeback stage
 	flopr #(32) r1W(clk,rst,aluoutM,aluoutW);
-	flopr #(32) r2W(clk,rst,readdataM,readdataW);
+	flopr #(32) r2W(clk,rst,data_rdataM,data_rdataW);
 	flopr #(32) r3W(clk,rst,hilo_outM,hilo_outW);
 	flopr #(5) r4W(clk,rst,writeregM,writeregW);
-	mux2 #(32) resmux1(aluoutW,readdataW,memtoregW,alumemW);
+	mux2 #(32) resmux1(aluoutW,data_rdataW,memtoregW,alumemW);
 	mux2 #(32) resmux2(alumemW,hilo_outW,hiloregreadW,resultW);
 endmodule

@@ -23,6 +23,7 @@
 module maindec(
 	input wire[5:0] op,
 	input wire[5:0]funct,
+	output reg [2:0]l_s_type,
 	output wire signimmnext,
 	output wire memtoreg,memwrite,
 	output wire branch,alusrc,
@@ -48,13 +49,37 @@ module maindec(
 			`SLTI:controls <= {8'b11010000,`SLTI_OP};//SLTI
 			`SLTIU:controls <= {8'b11010000,`SLTIU_OP};//SLTIU
 			
+			//八条访存指令
+			`LB:controls <= {8'b11010010,`ADDI_OP};//LB
+			`LBU:controls <= {8'b11010010,`ADDI_OP};//LBU
+			`LH:controls <= {8'b11010010,`ADDI_OP};//LH
+			`LHU:controls <= {8'b11010010,`ADDI_OP};//LHU
+			`LW:controls <= {8'b11010010,`ADDI_OP};//LW
+			`SB:controls <= {8'b10010100,`ADDI_OP};//SB
+			`SH:controls <= {8'b10010100,`ADDI_OP};//SH
+			`SW:controls <= {8'b10010100,`ADDI_OP};//SW
+
 			// 6'b000010:controls <= 9'b000000100;//J
 			`R_TYPE : case (funct)
 				`MTHI: controls <= {8'b00000000,`R_TYPE_OP};
 				`MTLO: controls <= {8'b00000000,`R_TYPE_OP};
 				default:  controls <= {8'b01100000,`R_TYPE_OP};
 			endcase
-			default:  controls <= 11'b00000000000;//illegal op
+			default:  controls <= 12'b000000000000;//illegal op
+		endcase
+	end
+
+	always @(*) begin
+		case (op)
+			`LB:l_s_type <= `LB_TYPE;//LB
+			`LBU:l_s_type <= `LBU_TYPE;//LBU
+			`LH:l_s_type <= `LH_TYPE;//LH
+			`LHU:l_s_type <= `LHU_TYPE;//LHU
+			`LW:l_s_type <= `LW_TYPE;//LW
+			`SB:l_s_type <= `SB_TYPE;//SB
+			`SH:l_s_type <= `SH_TYPE;//SH
+			`SW:l_s_type <= `SW_TYPE;//SW
+			default:l_s_type <= 3'b000;
 		endcase
 	end
 endmodule
